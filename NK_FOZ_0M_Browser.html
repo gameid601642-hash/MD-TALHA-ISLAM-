@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="NK FOZ 0M! Browser — a lightweight private browser-style start page with search, bookmarks, history and AI assistant.">
+  <title>NK FOZ 0M! Browser</title>
+  <style>
+    /* ===== BASE ===== */
+    :root{
+      color-scheme:light;
+      --bg:#f5f7fb; --card:#fff; --text:#111827; --muted:#64748b;
+      --line:#e2e8f0; --accent:#16a34a; --accent2:#facc15;
+      --shadow:0 14px 40px rgba(15,23,42,.09); --radius:22px;
+    }
+    :root[data-theme="dark"]{
+      color-scheme:dark;
+      --bg:#08111f; --card:#101c2e; --text:#f8fafc; --muted:#94a3b8;
+      --line:#223047; --accent:#4ade80; --accent2:#fde047;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    /* ===== CYBER / HACKER BACKGROUND ===== */
+    #matrixBg{position:fixed;inset:0;width:100%;height:100%;z-index:-10;pointer-events:none;opacity:.28}
+    .cyberScan{position:fixed;inset:0;z-index:-8;pointer-events:none;overflow:hidden;background:
+      linear-gradient(rgba(0,255,120,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,120,.025) 1px,transparent 1px);
+      background-size:36px 36px;mask-image:linear-gradient(to bottom,transparent,black 10%,black 90%,transparent)}
+    .cyberScan::after{content:"";position:absolute;left:0;right:0;height:2px;top:-4px;background:linear-gradient(90deg,transparent,rgba(74,222,128,.7),transparent);box-shadow:0 0 18px rgba(74,222,128,.8);animation:scanLine 6s linear infinite}
+    @keyframes scanLine{0%{top:-4px;opacity:0}8%{opacity:1}92%{opacity:1}100%{top:100%;opacity:0}}
+
+    body{margin:0;background:
+      radial-gradient(circle at 15% 0%,rgba(74,222,128,.16),transparent 30rem),
+      radial-gradient(circle at 90% 10%,rgba(250,204,21,.13),transparent 28rem),
+      radial-gradient(circle at 50% 100%,rgba(34,197,94,.08),transparent 32rem),
+      var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(55px);opacity:.38;mix-blend-mode:screen}
+body::before{width:280px;height:280px;left:-90px;top:18%;background:rgba(34,197,94,.28);animation:floatLight 12s ease-in-out infinite alternate}
+body::after{width:320px;height:320px;right:-110px;top:48%;background:rgba(250,204,21,.22);animation:floatLight2 15s ease-in-out infinite alternate}
+@keyframes floatLight{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(90px,80px,0) scale(1.18)}100%{transform:translate3d(20px,170px,0) scale(.9)}}
+@keyframes floatLight2{0%{transform:translate3d(0,0,0) scale(.9)}50%{transform:translate3d(-100px,-70px,0) scale(1.2)}100%{transform:translate3d(-20px,80px,0) scale(1)}}
+
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+    .wrap{width:min(100% - 24px,1050px);margin:auto}
+    body .wrap{position:relative}
+    main::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.12;background-image:linear-gradient(rgba(100,116,139,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(100,116,139,.25) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,transparent,black 15%,black 80%,transparent)}
+    main::after{content:"";position:fixed;left:-20%;top:0;width:40%;height:100%;z-index:-1;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(74,222,128,.06),transparent);transform:skewX(-18deg);animation:lightSweep 10s ease-in-out infinite}
+    @keyframes lightSweep{0%,100%{left:-45%;opacity:0}20%{opacity:1}55%{left:105%;opacity:.8}70%{opacity:0}}
+
+    .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:color-mix(in srgb,var(--bg) 82%,transparent);border-bottom:1px solid var(--line)}
+    .nav{min-height:66px;display:flex;align-items:center;gap:10px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;flex:1}
+    .logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#102014;box-shadow:0 8px 24px rgba(22,163,74,.2)}
+    .brand small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+    .iconbtn,.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:10px 12px;box-shadow:0 5px 16px rgba(15,23,42,.05)}
+    .iconbtn{width:42px;height:42px;padding:0}
+    .iconbtn.active{background:var(--text);color:var(--bg)}
+    main{padding:34px 0 70px}
+    .hero{text-align:center;padding:24px 0 28px}
+    .hero h1{font-size:clamp(28px,8vw,56px);margin:0 0 8px;letter-spacing:-.04em}
+    .hero p{color:var(--muted);margin:0 auto 24px;max-width:620px}
+    .startup{animation:glow 1.2s ease-out}
+    @keyframes glow{0%{filter:brightness(1.35);transform:translateY(4px)}100%{filter:none;transform:none}}
+    .searchbox{display:flex;gap:8px;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);max-width:760px;margin:auto}
+    .searchbox input{min-width:0;flex:1;border:0;background:transparent;color:var(--text);padding:12px 10px;outline:none}
+    .primary{border:0;border-radius:14px;padding:12px 17px;background:linear-gradient(135deg,var(--accent),#22c55e);color:#06210e;font-weight:900}
+    .section{margin-top:18px}
+    .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .section h2{font-size:17px;margin:0}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+     .quick{position:relative;display:flex;align-items:center;gap:10px;padding:14px;border:1px solid var(--line);background:var(--card);border-radius:18px;color:var(--text);text-decoration:none;box-shadow:0 7px 22px rgba(15,23,42,.05);min-height:66px;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+    .quick:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(34,197,94,.12);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+    .quick .qicon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--bg);font-weight:900}
+    .remove{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:20px}
+    .list{display:grid;gap:8px}
+    .item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:16px}
+    .item a{color:var(--text);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .empty{color:var(--muted);padding:18px;text-align:center;border:1px dashed var(--line);border-radius:16px}
+    .ai{margin-top:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 11%,var(--card)),var(--card));border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+    .aihead{display:flex;align-items:center;gap:10px}
+    .spark{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#a7f3d0,#fde68a);color:#0f172a;font-weight:900}
+    .ai small{color:var(--muted)}
+    .ai textarea{width:100%;min-height:80px;resize:vertical;margin:14px 0 10px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--bg);color:var(--text)}
+    .aiout{white-space:pre-wrap;line-height:1.55;color:var(--text);margin-top:12px}
+    .notice{font-size:12px;color:var(--muted);margin-top:8px}
+    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+    dialog{border:1px solid var(--line);border-radius:22px;background:var(--card);color:var(--text);width:min(92%,430px);padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.3)}
+    dialog::backdrop{background:rgba(2,6,23,.6);backdrop-filter:blur(4px)}
+    dialog input{width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);margin:8px 0 14px}
+    .actions{display:flex;justify-content:flex-end;gap:8px}
+    .chatMessages{display:grid;gap:10px;max-height:360px;overflow:auto;margin:14px 0;padding:4px}
+    .chatBubble{max-width:88%;padding:11px 14px;border-radius:16px;line-height:1.5;word-break:break-word}
+    .chatBubble.user{justify-self:end;background:linear-gradient(135deg,var(--accent),#22c55e);color:#05200d;border-bottom-right-radius:5px}
+    .chatBubble.assistant{justify-self:start;background:var(--bg);border:1px solid var(--line);border-bottom-left-radius:5px}
+    .chatBubble.error{border-color:#ef4444}
+    .chatComposer{display:flex;gap:8px;align-items:flex-end}
+    .chatComposer textarea{flex:1;min-height:48px;max-height:140px;resize:vertical;margin:0}
+    .chatComposer .primary{width:52px;height:48px;padding:0}
+    .typing{display:inline-flex;gap:4px;align-items:center}
+    .typing i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:bounce .9s infinite alternate}
+    .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{to{transform:translateY(-4px);opacity:.45}}
+    @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <canvas id="matrixBg" aria-hidden="true"></canvas>
+  <div class="cyberScan" aria-hidden="true"></div>
+  <header class="topbar">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <div class="brand"><div class="logo" aria-hidden="true">N</div><div>NK FOZ 0M!<small>Browser</small></div></div>
+      <button id="themeBtn" class="iconbtn" aria-label="Toggle theme" title="Toggle theme">☾</button>
+      <button id="incognitoBtn" class="iconbtn" aria-label="Toggle incognito mode" title="Incognito mode">◉</button>
+      <button id="clearBtn" class="iconbtn" aria-label="Clear saved browser data" title="Clear data">⌫</button>
+      <a class="iconbtn" href="https://wa.me/8801978726477" target="_blank" rel="noopener noreferrer" aria-label="Contact support" title="Support" style="display:grid;place-items:center;text-decoration:none">?</a>
+    </nav>
+  </header>
+
+  <main class="wrap startup">
+    <section class="hero">
+      <h1>Browse freely.</h1>
+      <p>Search the web, keep useful links close, and optionally ask your AI assistant.</p>
+      <form id="searchForm" class="searchbox" role="search">
+        <input id="searchInput" aria-label="Search the web" autocomplete="off" placeholder="Search Google or enter a URL…">
+        <button class="primary" type="submit">Search</button>
+      </form>
+      <div id="pseContainer" aria-label="Google search area">
+        <!-- PASTE_PSE_SCRIPT_HERE -->
+        <!-- Paste your Google PSE script + <div class="gcse-search"></div> here. -->
+      </div>
+      <div id="modeNote" class="notice" aria-live="polite"></div>
+    </section>
+
+    <section class="section" aria-labelledby="quickTitle">
+      <div class="sectionhead"><h2 id="quickTitle">Quick links</h2><button class="btn" id="addQuickBtn">＋ Add</button></div>
+      <div id="quickGrid" class="grid"></div>
+    </section>
+
+    <section class="section" aria-labelledby="bookmarkTitle">
+      <div class="sectionhead"><h2 id="bookmarkTitle">Bookmarks</h2><button class="btn" id="addBookmarkBtn">＋ Add</button></div>
+      <div id="bookmarkList" class="list"></div>
+    </section>
+
+    <section class="section" aria-labelledby="historyTitle">
+      <div class="sectionhead"><h2 id="historyTitle">Recent searches</h2></div>
+      <div id="historyList" class="list"></div>
+    </section>
+
+    <section class="ai" aria-labelledby="aiTitle">
+      <div class="aihead">
+        <div class="spark" aria-hidden="true">✦</div>
+        <div><h2 id="aiTitle" style="margin:0">ChatGPT Assistant</h2><small>AI chat • secure endpoint ready</small></div>
+      </div>
+      <div id="chatMessages" class="chatMessages" aria-live="polite" aria-label="Chat messages">
+        <div class="chatBubble assistant">Hi! Ask me anything. Configure <code>AI_API_ENDPOINT</code> below to connect your ChatGPT backend.</div>
+      </div>
+      <div class="chatComposer">
+        <textarea id="aiInput" aria-label="Message ChatGPT" rows="2" placeholder="Message ChatGPT…"></textarea>
+        <button id="aiBtn" class="primary" type="button" aria-label="Send message">➤</button>
+      </div>
+      <div id="aiStatus" class="notice" role="status"></div>
+      <div class="notice">For security, do not put an OpenAI API key in this HTML. Use a server-side proxy endpoint.</div>
+    </section>
+
+    <section class="section" aria-label="Support">
+      <div class="item" style="justify-content:center">
+        <span>🛟</span>
+        <a href="https://wa.me/8801978726477" target="_blank" rel="noopener noreferrer" style="text-align:center;font-weight:800">Contact Support</a>
+      </div>
+    </section>
+    <div class="footer">NK FOZ 0M! Browser • Local data stays in this browser unless you use an external search/AI service.</div>
+  </main>
+
+  <dialog id="addDialog">
+    <form method="dialog" id="addForm">
+      <h3 id="dialogTitle">Add item</h3>
+      <label>Name<input id="itemName" required maxlength="60"></label>
+      <label>URL<input id="itemUrl" required type="url" placeholder="https://example.com"></label>
+      <div class="actions"><button class="btn" value="cancel">Cancel</button><button class="primary" value="default">Save</button></div>
+    </form>
+  </dialog>
+
+<script>
+/* ===== CONFIG ===== */
+/* PSE: Paste the Google PSE snippet at the marker in the HTML above. */
+const AI_API_ENDPOINT = "/api/chat"; // Secure backend endpoint; API key stays on the server.
+const AI_MODEL = "gpt-5.6";
+
+/* ===== STORAGE ===== */
+const KEYS = {theme:"nk_theme", quick:"nk_quick", bookmarks:"nk_bookmarks", history:"nk_history", incognito:"nk_incognito"};
+let incognito = false;
+const defaults = [
+  {name:"YouTube",url:"https://www.youtube.com",icon:"▶"},
+  {name:"Facebook",url:"https://www.facebook.com",icon:"f"},
+  {name:"Google",url:"https://www.google.com",icon:"G"},
+  {name:"Wikipedia",url:"https://www.wikipedia.org",icon:"W"}
+];
+function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
+function save(key,value){if(!incognito)localStorage.setItem(key,JSON.stringify(value))}
+function getQuick(){return load(KEYS.quick,defaults)}
+function getBookmarks(){return load(KEYS.bookmarks,[])}
+function getHistory(){return load(KEYS.history,[])}
+
+/* ===== THEME ===== */
+function systemTheme(){return matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}
+function applyTheme(theme){document.documentElement.dataset.theme=theme;document.getElementById("themeBtn").textContent=theme==="dark"?"☀":"☾"}
+function initTheme(){const saved=localStorage.getItem(KEYS.theme);applyTheme(saved||systemTheme())}
+function toggleTheme(){const next=document.documentElement.dataset.theme==="dark"?"light":"dark";localStorage.setItem(KEYS.theme,next);applyTheme(next)}
+
+/* ===== UI RENDERING ===== */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function renderQuick(){
+  const data=getQuick(), el=document.getElementById("quickGrid");
+  el.innerHTML=data.length?data.map((x,i)=>`<a class="quick" href="${escapeHtml(x.url)}" target="_blank" rel="noopener" data-index="${i}"><span class="qicon">${escapeHtml(x.icon||x.name[0].toUpperCase())}</span><strong>${escapeHtml(x.name)}</strong><button class="remove" type="button" aria-label="Remove ${escapeHtml(x.name)}" data-remove-quick="${i}">×</button></a>`).join(""):'<div class="empty">No quick links yet.</div>';
+}
+function renderBookmarks(){
+  const data=getBookmarks(),el=document.getElementById("bookmarkList");
+  el.innerHTML=data.length?data.map((x,i)=>`<div class="item"><span>🔖</span><a href="${escapeHtml(x.url)}" target="_blank" rel="noopener">${escapeHtml(x.name)}</a><button class="remove" type="button" aria-label="Remove bookmark" data-remove-bookmark="${i}">×</button></div>`).join(""):'<div class="empty">No bookmarks yet.</div>';
+}
+function renderHistory(){
+  const data=getHistory(),el=document.getElementById("historyList");
+  el.innerHTML=data.length?data.map((x,i)=>`<div class="item"><span>⌕</span><a href="https://www.google.com/search?q=${encodeURIComponent(x)}" target="_blank" rel="noopener">${escapeHtml(x)}</a><button class="remove" type="button" aria-label="Remove search" data-remove-history="${i}">×</button></div>`).join(""):'<div class="empty">No recent searches.</div>';
+}
+function renderAll(){renderQuick();renderBookmarks();renderHistory();updateModeNote()}
+
+/* ===== SEARCH ===== */
+function isUrl(text){return /^(https?:\/\/|www\.)/i.test(text)||/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(text)}
+function searchTarget(q){return isUrl(q)?(q.startsWith("http")?q:"https://"+q):"https://www.google.com/search?q="+encodeURIComponent(q)}
+function performSearch(q){
+  q=q.trim(); if(!q)return;
+  if(!incognito){let h=getHistory().filter(x=>x!==q);h.unshift(q);save(KEYS.history,h.slice(0,30))}
+  renderHistory();
+  window.open(searchTarget(q),"_blank","noopener");
+}
+document.getElementById("searchForm").addEventListener("submit",e=>{e.preventDefault();performSearch(document.getElementById("searchInput").value)});
+
+/* ===== INCognito ===== */
+function updateModeNote(){document.getElementById("modeNote").textContent=incognito?"Incognito is ON — history and new saved items are not stored.":"Private local storage is ON — your saved links and history stay in this browser."}
+function toggleIncognito(){
+  incognito=!incognito;
+  document.getElementById("incognitoBtn").classList.toggle("active",incognito);
+  updateModeNote();
+}
+function clearData(){
+  if(!confirm("Clear saved quick links, bookmarks and search history?"))return;
+  [KEYS.quick,KEYS.bookmarks,KEYS.history].forEach(k=>localStorage.removeItem(k));
+  renderAll();
+}
+
+/* ===== DIALOG / EDITABLE LINKS ===== */
+let dialogMode="quick";
+function openAdd(mode){
+  dialogMode=mode;
+  document.getElementById("dialogTitle").textContent=mode==="quick"?"Add quick link":"Add bookmark";
+  document.getElementById("itemName").value="";document.getElementById("itemUrl").value="";
+  document.getElementById("addDialog").showModal();
+}
+document.getElementById("addForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(incognito){alert("Incognito mode does not save new items.");document.getElementById("addDialog").close();return}
+  const name=document.getElementById("itemName").value.trim(),url=document.getElementById("itemUrl").value.trim();
+  if(dialogMode==="quick"){let a=getQuick();a.push({name,url,icon:name[0]?.toUpperCase()||"•"});save(KEYS.quick,a)}
+  else {let a=getBookmarks();a.push({name,url});save(KEYS.bookmarks,a)}
+  document.getElementById("addDialog").close();renderAll();
+});
+
+/* ===== EVENT DELEGATION ===== */
+document.addEventListener("click",e=>{
+  const q=e.target.closest("[data-remove-quick]");
+  if(q){e.preventDefault();if(incognito)return;let a=getQuick();a.splice(+q.dataset.removeQuick,1);save(KEYS.quick,a);renderQuick();return}
+  const b=e.target.closest("[data-remove-bookmark]");
+  if(b){if(incognito)return;let a=getBookmarks();a.splice(+b.dataset.removeBookmark,1);save(KEYS.bookmarks,a);renderBookmarks();return}
+  const h=e.target.closest("[data-remove-history]");
+  if(h){if(incognito)return;let a=getHistory();a.splice(+h.dataset.removeHistory,1);save(KEYS.history,a);renderHistory()}
+});
+
+/* ===== CHATGPT / AI WIRING ===== */
+/* Your backend should keep OPENAI_API_KEY secret and call the OpenAI Responses API.
+   Request from this page: {message, history}
+   Expected response: {reply:"..."}.
+   Never expose the API key in client-side HTML. */
+let chatHistory=[];
+function addChatMessage(role,text,error=false){
+  const box=document.getElementById("chatMessages"),el=document.createElement("div");
+  el.className="chatBubble "+role+(error?" error":"");
+  el.textContent=text; box.appendChild(el); box.scrollTop=box.scrollHeight; return el;
+}
+function addTyping(){
+  const box=document.getElementById("chatMessages"),el=document.createElement("div");
+  el.className="chatBubble assistant";el.id="typingBubble";
+  el.innerHTML='<span class="typing" aria-label="AI is typing"><i></i><i></i><i></i></span>';
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
+}
+function removeTyping(){document.getElementById("typingBubble")?.remove()}
+async function askAI(){
+  const input=document.getElementById("aiInput"),msg=input.value.trim(),btn=document.getElementById("aiBtn"),status=document.getElementById("aiStatus");
+  if(!msg)return;
+  if(!AI_API_ENDPOINT){addChatMessage("assistant","AI endpoint is not configured. Set AI_API_ENDPOINT to your secure backend URL.",true);return}
+  input.value="";addChatMessage("user",msg);chatHistory.push({role:"user",content:msg});
+  btn.disabled=true;status.textContent="Connecting…";addTyping();
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),30000);
+  try{
+    const res=await fetch(AI_API_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:msg,history:chatHistory,model:AI_MODEL}),signal:controller.signal});
+    if(!res.ok)throw new Error("Server returned HTTP "+res.status);
+    const data=await res.json(),reply=data.reply||data.output_text||data.output||data.message;
+    if(!reply)throw new Error("The server returned no AI reply.");
+    removeTyping();addChatMessage("assistant",reply);chatHistory.push({role:"assistant",content:reply});
+    status.textContent="Ready";
+  }catch(err){
+    removeTyping();
+    const message=err.name==="AbortError"?"Request timed out. Please try again.":"Could not connect to the AI service: "+err.message;
+    addChatMessage("assistant",message,true);status.textContent="Error";
+  }finally{clearTimeout(timeout);btn.disabled=false;input.focus()}
+}
+document.getElementById("aiInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();askAI()}
+});
+/* ===== CYBER MATRIX BACKGROUND ===== */
+function initMatrix(){
+  const canvas=document.getElementById("matrixBg"),ctx=canvas.getContext("2d");
+  if(!ctx)return;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce)return;
+  let w=0,h=0,cols=[],font=13;
+  const chars="01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>[]{}#$%&";
+  function resize(){
+    const dpr=Math.min(devicePixelRatio||1,2); w=innerWidth;h=innerHeight;
+    canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+"px";canvas.style.height=h+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0); cols=Array.from({length:Math.ceil(w/font)},()=>Math.random()*-50);
+  }
+  function draw(){
+    ctx.fillStyle="rgba(5,10,18,.085)";ctx.fillRect(0,0,w,h);
+    ctx.font=font+"px monospace";
+    for(let i=0;i<cols.length;i++){
+      const x=i*font,y=cols[i]*font;
+      ctx.fillStyle=Math.random()>.93?"rgba(190,255,210,.9)":"rgba(30,220,105,.58)";
+      ctx.fillText(chars[(Math.random()*chars.length)|0],x,y);
+      if(y>h&&Math.random()>.975)cols[i]=0;
+      cols[i]+=Math.random()*.75+.25;
+    }
+    requestAnimationFrame(draw);
+  }
+  resize();addEventListener("resize",resize,{passive:true});draw();
+}
+initMatrix();
+
+/* ===== INIT ===== */
+document.getElementById("themeBtn").addEventListener("click",toggleTheme);
+document.getElementById("incognitoBtn").addEventListener("click",toggleIncognito);
+document.getElementById("clearBtn").addEventListener("click",clearData);
+document.getElementById("addQuickBtn").addEventListener("click",()=>openAdd("quick"));
+document.getElementById("addBookmarkBtn").addEventListener("click",()=>openAdd("bookmark"));
+document.getElementById("aiBtn").addEventListener("click",askAI);
+initTheme();renderAll();
+</script>
+</body>
+</html>
